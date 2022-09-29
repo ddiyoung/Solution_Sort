@@ -11,8 +11,8 @@ class PngProcessing(object):
         self.contour_pos = []
         self.min = 180
         self.max = 190
-        self.h_range = 6
-        self.w_range = 15
+        self.h_range = [100, 200]
+        self.w_range = [200, 300]
         self.contours = []
 
 
@@ -21,62 +21,36 @@ class PngProcessing(object):
         return self.img_gray
 
     def threshOld(self, min, max):
-        #if not self.img_gray:
-         #   self.grayScale()
-        
-        _, self.thresh = cv2.threshhold(self.img_gray, min, max, cv2.THRESH_BINARY_INV)
+        _, self.thresh = cv2.threshold(self.img_gray, min, max, cv2.THRESH_BINARY_INV)
         return self.thresh
 
     def dilate(self):
-        if not self.thresh:
-            self.threshOld(self.min, self.max)
-        
-        self.dilation = cv2.dilate(self.thresh, self.kernel, iteration=2)
+        self.dilation = cv2.dilate(self.thresh, self.kernel, iterations=2)
         return self.dilation
 
     def close(self):
-        if not self.dilation :
-            self.dilate()
-        
-        self.closing = cv2.morphologyEx(self.dilate, cv2.MORPH_CLOSE, self.kernel)
+        self.closing = cv2.morphologyEx(self.dilation, cv2.MORPH_CLOSE, self.kernel)
         return self.closing
 
     def findContour(self):
-        print(self.closing)
-
-        if not self.closing:
-            self.close()
-
         self.contours, self.hierarchy = cv2.findContours(self.closing, cv2.RETR_EXTERNAL, 3)
         return self.contours
 
     def boudingContour(self, h_range, w_range):
-        if not self.contours:
-            self.findContour()
-
         for pos in range(len(self.contours)):
             x, y, w, h = cv2.boundingRect(self.contours[pos])
 
-            if h_range[0] <= h <= h_range[1] and w_range[0] <= w <= h_range[1]:
+            if h_range[0] <= h <= h_range[1] and w_range[0] <= w <= w_range[1]:
                 self.contour_pos.append(pos)
         
         return self.contour_pos
     
     def cropThresh(self):
-        if not self.img_gray:
-            self.grayScale()
-        
         _, self.crop_thresh = cv2.threshold(self.img_gray, 227, 255, cv2.THRESH_BINARY_INV)
         return self.crop_thresh
 
     def cropImage(self):
-        if not self.contour_pos :
-            self.boudingContour(self.h_range, self.w_range)
-
-        if not self.crop_thresh:
-                self.cropThresh()
-
-        for pos in range(len(self.contours)):
+        for pos in self.contour_pos:
             x, y , w, h = cv2.boundingRect(self.contours[pos])
             img_crop = self.crop_thresh[y:y + h, x: x+w]
             cv2.imwrite(f'./crop/{self.pngfile}/img_crop_{pos}.png', img_crop)
@@ -95,4 +69,3 @@ class PngProcessing(object):
         self.boudingContour(self.h_range, self.w_range)
         self.cropThresh()
         self.cropImage()
-        return 0
