@@ -7,10 +7,10 @@ class PngProcessing(object):
     def __init__(self):
         self.pngfile = ""
         self.img = object
-        self.kernel = np.ones((6, 15), np.uint8)
+        self.kernel = np.ones((3, 13), np.uint8)
         self.contour_pos = []
-        self.min = 180
-        self.max = 190
+        self.min = 190
+        self.max = 200
         self.h_range = [100, 200]
         self.w_range = [200, 300]
         self.contours = []
@@ -55,9 +55,16 @@ class PngProcessing(object):
             img_crop = self.crop_thresh[y:y + h, x: x+w]
             cv2.imwrite(f'./crop/{self.pngfile}/img_crop_{pos}.png', img_crop)
 
+    def darwImage(self):
+        img_copy = self.img.copy()
+
+        img_contour = cv2.drawContours(img_copy, self.contours, -1, (0, 255, 0), 3)
+        cv2.imwrite(f'./draw/{self.pngfile}/{self.pngfile}', img_contour)
+
     def run(self, Pngfile):
         self.pngfile = os.path.basename(Pngfile)
         os.makedirs(f'./crop/{self.pngfile}', exist_ok = True)
+        os.makedirs(f'./draw/{self.pngfile}', exist_ok = True)
 
         self.img = cv2.imread(Pngfile)
 
@@ -66,6 +73,7 @@ class PngProcessing(object):
         self.dilate()
         self.close()
         self.findContour()
+        #self.darwImage()
         self.boudingContour(self.h_range, self.w_range)
         self.cropThresh()
         self.cropImage()

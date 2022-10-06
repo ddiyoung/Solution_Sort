@@ -19,7 +19,7 @@ img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 _, thresh = cv2.threshold(img_gray, 190, 200, cv2.THRESH_BINARY_INV)
 
 
-kernel = np.ones((3, 9), np.uint8)
+kernel = np.ones((2, 2), np.uint8)
 
 dilation = cv2.dilate(thresh, kernel, iterations=2)
 

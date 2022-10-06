@@ -4,7 +4,7 @@ import os
 from engine.processing import PngProcessing
 
 def read_all_png_files():
-    return glob.glob(os.path.join("image", "*.jpg"))
+    return glob.glob(os.path.join("image", "*.png"))
 
 
 def main():
